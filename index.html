@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Klamotten-Scanner</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Kleiderschrank">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="data:image/png;base64,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">
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 20px 16px 40px 16px;
+        background: #F2F2F7;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+        color: #1C1C1E;
+        max-width: 480px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0 0 16px 0;
+      }
+
+      .card {
+        background: #FFFFFF;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      }
+
+      .upload-card {
+        padding: 12px 16px;
+        margin-bottom: 20px;
+        overflow: hidden;
+      }
+
+      .kategorie-select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #D1D1D6;
+        border-radius: 10px;
+        font-size: 15px;
+        font-family: inherit;
+        color: #1C1C1E;
+        margin-bottom: 10px;
+        background: #FFFFFF;
+      }
+
+      .kategorie-abzeichen {
+        display: inline-block;
+        background: #E5F1FF;
+        color: #007AFF;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 6px;
+        margin: 6px 0 0 8px;
+      }
+
+      .upload-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 16px;
+        color: #007AFF;
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .upload-icon {
+        font-size: 20px;
+      }
+
+      #foto-input {
+        display: none;
+      }
+
+      #kleiderschrank-liste {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 12px;
+      }
+
+      .klamotte {
+        background: #FFFFFF;
+        border-radius: 14px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        overflow: hidden;
+        position: relative;
+      }
+
+      .klamotte img {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        display: block;
+      }
+
+      .klamotte p {
+        font-size: 12px;
+        color: #3C3C43;
+        margin: 0;
+        padding: 8px;
+        line-height: 1.3;
+      }
+
+      .loesch-knopf {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(0,0,0,0.5);
+        color: #FFFFFF;
+        font-size: 14px;
+        line-height: 1;
+        padding: 0;
+        margin: 0;
+      }
+
+      .waesche-knopf {
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(0,0,0,0.5);
+        font-size: 12px;
+        line-height: 1;
+        padding: 0;
+        margin: 0;
+      }
+
+      .in-waesche img {
+        opacity: 0.35;
+      }
+
+      .waesche-abzeichen {
+        position: absolute;
+        bottom: 34px;
+        left: 6px;
+        right: 6px;
+        background: rgba(0,0,0,0.6);
+        color: #FFFFFF;
+        font-size: 10px;
+        text-align: center;
+        border-radius: 6px;
+        padding: 3px 0;
+      }
+
+      .leer-hinweis {
+        color: #8E8E93;
+        font-size: 14px;
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 24px 0;
+      }
+
+      .loesch-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(28,28,30,0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 8px;
+      }
+
+      .loesch-overlay p {
+        color: #FFFFFF;
+        font-size: 12px;
+        text-align: center;
+        margin: 0;
+      }
+
+      .overlay-knopf {
+        width: 100%;
+        padding: 6px 0;
+        border: none;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        font-family: inherit;
+      }
+
+      .overlay-knopf.ja {
+        background: #FF3B30;
+        color: #FFFFFF;
+      }
+
+      .overlay-knopf.nein {
+        background: #E5E5EA;
+        color: #1C1C1E;
+      }
+
+      h2 {
+        font-size: 20px;
+        font-weight: 700;
+        margin: 28px 0 12px 0;
+      }
+
+      .outfit-card {
+        padding: 16px;
+        display: flex;
+        gap: 8px;
+      }
+
+      .stil-input {
+        flex: 1;
+        border: 1px solid #D1D1D6;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 15px;
+        font-family: inherit;
+      }
+
+      #outfit-knopf {
+        border: none;
+        border-radius: 10px;
+        background: #007AFF;
+        color: #FFFFFF;
+        font-size: 15px;
+        font-weight: 600;
+        font-family: inherit;
+        padding: 0 16px;
+      }
+
+      #outfit-ergebnis {
+        margin-top: 12px;
+      }
+
+      .wetter-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: #3C3C43;
+        margin-top: 10px;
+      }
+
+      .wetter-checkbox input {
+        width: 18px;
+        height: 18px;
+      }
+
+      .outfit-ergebnis-card {
+        padding: 16px;
+      }
+
+      .outfit-bilder {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .outfit-bilder img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 10px;
+      }
+
+      .outfit-begruendung {
+        font-size: 14px;
+        color: #3C3C43;
+        margin: 0;
+        line-height: 1.4;
+      }
+
+      .outfit-name {
+        font-size: 16px;
+        font-weight: 700;
+        margin: 0 0 10px 0;
+        color: #1C1C1E;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Mein Kleiderschrank</h1>
+
+    <div class="card upload-card">
+      <select id="kategorie-input" class="kategorie-select">
+        <option value="Oberteil">Oberteil</option>
+        <option value="Hose">Hose</option>
+        <option value="Schuhe">Schuhe</option>
+        <option value="Accessoire">Accessoire</option>
+        <option value="Uhr">Uhr</option>
+      </select>
+      <label class="upload-label" for="foto-input">
+        <span class="upload-icon">＋</span>
+        <span>Klamotte hinzufügen</span>
+      </label>
+      <input type="file" accept="image/*" id="foto-input" onchange="klamotteHinzufuegen(event)">
+    </div>
+
+    <div id="kleiderschrank-liste"></div>
+
+    <h2>Outfit vorschlagen</h2>
+    <div class="card outfit-card">
+      <input type="text" id="stil-input" placeholder="z.B. sportlich, elegant, gemütlich" class="stil-input">
+      <button id="outfit-knopf" onclick="outfitVorschlagen()">Outfit vorschlagen</button>
+    </div>
+    <label class="wetter-checkbox">
+      <input type="checkbox" id="wetter-checkbox" checked>
+      Wetter berücksichtigen (fragt nach Standort)
+    </label>
+    <div id="outfit-ergebnis"></div>
+    <script>
+      let klamotten = JSON.parse(localStorage.getItem('klamotten')) || [];
+      let zuBestaetigenIndex = null;
+
+      function jahreszeitBestimmen() {
+        let heute = new Date();
+        let monat = heute.getMonth() + 1;
+
+        if (monat === 12 || monat === 1 || monat === 2) {
+          return 'Winter';
+        } else if (monat >= 3 && monat <= 5) {
+          return 'Frühling';
+        } else if (monat >= 6 && monat <= 8) {
+          return 'Sommer';
+        } else {
+          return 'Herbst';
+        }
+      }
+
+      function standortHolen() {
+        return new Promise(function(resolve, reject) {
+          navigator.geolocation.getCurrentPosition(resolve, reject);
+        });
+      }
+
+      async function temperaturHolen() {
+        try {
+          let position = await standortHolen();
+          let lat = position.coords.latitude;
+          let lon = position.coords.longitude;
+
+          let response = await fetch(
+            'https://api.open-meteo.com/v1/forecast?latitude=' + lat +
+            '&longitude=' + lon + '&current=temperature_2m'
+          );
+          let daten = await response.json();
+          return daten.current.temperature_2m;
+        } catch (fehler) {
+          console.log('Wetter konnte nicht geladen werden:', fehler);
+          return null;
+        }
+      }
+
+      async function klamotteHinzufuegen(event) {
+        let datei = event.target.files[0];
+        let kategorie = document.getElementById('kategorie-input').value;
+        let reader = new FileReader();
+
+        reader.onload = async function() {
+          let bildDataUrl = reader.result;
+
+          // Platzhalter anzeigen, während die KI arbeitet
+          klamotten.push({ bild: bildDataUrl, info: 'Wird erkannt …', kategorie: kategorie, inWaesche: false });
+          kleiderschrankAnzeigen();
+          let neuerIndex = klamotten.length - 1;
+
+          let info = await klamotteErkennen(bildDataUrl);
+          let marke = prompt('Welche Marke ist das? (leer lassen, falls unbekannt)');
+
+          if (marke) {
+            info = info + ', Marke: ' + marke;
+          }
+
+          klamotten[neuerIndex].info = info;
+          try {
+            localStorage.setItem('klamotten', JSON.stringify(klamotten));
+          } catch (fehler) {
+            console.log('Konnte nicht gespeichert werden:', fehler);
+          }
+          kleiderschrankAnzeigen();
+        };
+
+        reader.readAsDataURL(datei);
+      }
+
+      async function klamotteErkennen(bildDataUrl) {
+        try {
+          let base64 = bildDataUrl.split(',')[1];
+          let mediaType = bildDataUrl.split(';')[0].split(':')[1];
+
+          let response = await fetch("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: "claude-sonnet-4-6",
+              max_tokens: 300,
+              messages: [
+                {
+                  role: "user",
+                  content: [
+                    { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
+                    { type: "text", text: "Beschreibe dieses Kleidungsstück in einem kurzen Satz auf Deutsch: Art und Farbe. Antworte NUR mit dem einen Satz, ohne Anführungszeichen." }
+                  ]
+                }
+              ]
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error('KI nicht erreichbar');
+          }
+
+          let data = await response.json();
+          return data.content[0].text;
+        } catch (fehler) {
+          console.log('KI-Erkennung fehlgeschlagen:', fehler);
+          let manuelleEingabe = prompt('KI nicht verfügbar. Beschreib das Kleidungsstück selbst (Art, Farbe):');
+          return manuelleEingabe || 'Unbeschriftet';
+        }
+      }
+
+      /**
+       * Erstellt ein Outfit OHNE KI: durchsucht die Beschreibungen der
+       * Klamotten nach dem eingegebenen Stil-Wort. Wählt pro Pflicht-
+       * Kategorie (Oberteil, Hose, Schuhe) das erste Teil, dessen Text
+       * den Stil enthält – oder ersatzweise irgendein Teil dieser
+       * Kategorie, falls kein direkter Treffer da ist.
+       * Accessoire und Uhr werden nur bei direktem Treffer aufgenommen.
+       */
+      function outfitOhneKiErstellen(stil) {
+        let stilKlein = stil.toLowerCase();
+        let pflichtKategorien = ['Oberteil', 'Hose', 'Schuhe'];
+        let optionaleKategorien = ['Accessoire', 'Uhr'];
+        let ausgewaehlteIndices = [];
+
+        function indexeDerKategorie(kategorie) {
+          let treffer = [];
+          for (let i = 0; i < klamotten.length; i++) {
+            if (klamotten[i].inWaesche) {
+              continue;
+            }
+            if (klamotten[i].kategorie === kategorie) {
+              treffer.push(i);
+            }
+          }
+          return treffer;
+        }
+
+        function passtZumStil(index) {
+          let text = (klamotten[index].info + ' ' + klamotten[index].kategorie).toLowerCase();
+          return text.includes(stilKlein);
+        }
+
+        function ersteZahlOderNull(liste) {
+          if (liste.length > 0) {
+            return liste[0];
+          }
+          return null;
+        }
+
+        // Pflicht-Kategorien: Treffer bevorzugen, sonst irgendein Teil nehmen
+        for (let k = 0; k < pflichtKategorien.length; k++) {
+          let alleDerKategorie = indexeDerKategorie(pflichtKategorien[k]);
+          let treffer = alleDerKategorie.filter(passtZumStil);
+
+          let gewaehlterIndex = ersteZahlOderNull(treffer);
+          if (gewaehlterIndex === null) {
+            gewaehlterIndex = ersteZahlOderNull(alleDerKategorie);
+          }
+          if (gewaehlterIndex !== null) {
+            ausgewaehlteIndices.push(gewaehlterIndex);
+          }
+        }
+
+        // Optionale Kategorien: nur bei echtem Treffer dazunehmen
+        for (let k = 0; k < optionaleKategorien.length; k++) {
+          let alleDerKategorie = indexeDerKategorie(optionaleKategorien[k]);
+          let treffer = alleDerKategorie.filter(passtZumStil);
+          let gewaehlterIndex = ersteZahlOderNull(treffer);
+          if (gewaehlterIndex !== null) {
+            ausgewaehlteIndices.push(gewaehlterIndex);
+          }
+        }
+
+        let stilGrossgeschrieben = stil.charAt(0).toUpperCase() + stil.slice(1);
+
+        return {
+          outfitName: stilGrossgeschrieben + '-Outfit (ohne KI)',
+          indices: ausgewaehlteIndices,
+          begruendung: 'Ohne KI zusammengestellt: Teile, deren Beschreibung "' + stil + '" enthält, sonst das erste verfügbare Teil je Kategorie.'
+        };
+      }
+
+      async function outfitVorschlagen() {
+        let stil = document.getElementById('stil-input').value;
+        let mitWetter = document.getElementById('wetter-checkbox').checked;
+
+        if (!stil) {
+          alert('Bitte gib erst einen Stil ein.');
+          return;
+        }
+
+        if (klamotten.length === 0) {
+          alert('Dein Kleiderschrank ist noch leer.');
+          return;
+        }
+
+        let ergebnisBereich = document.getElementById('outfit-ergebnis');
+        ergebnisBereich.innerHTML = '<div class="card outfit-ergebnis-card"><p class="outfit-begruendung">Suche passendes Outfit …</p></div>';
+
+        let jahreszeit = jahreszeitBestimmen();
+        let temperatur = null;
+
+        if (mitWetter) {
+          temperatur = await temperaturHolen();
+        }
+
+        // Liste aller Klamotten als Text für die KI vorbereiten (Wäsche wird übersprungen)
+        let klamottenText = '';
+        for (let i = 0; i < klamotten.length; i++) {
+          if (klamotten[i].inWaesche) {
+            continue;
+          }
+          klamottenText = klamottenText + i + ': [' + klamotten[i].kategorie + '] ' + klamotten[i].info + '\n';
+        }
+
+        let antwortText = await outfitAnfragen(klamottenText, stil, jahreszeit, temperatur);
+
+        let vorschlag;
+        if (antwortText === null) {
+          vorschlag = outfitOhneKiErstellen(stil);
+        } else {
+          vorschlag = JSON.parse(antwortText);
+        }
+
+        if (vorschlag.indices.length === 0) {
+          ergebnisBereich.innerHTML = '<div class="card outfit-ergebnis-card"><p class="outfit-begruendung">Kein passendes Outfit gefunden. Füg mehr Klamotten mit Kategorie hinzu.</p></div>';
+          return;
+        }
+
+        outfitAnzeigen(vorschlag);
+      }
+
+      async function outfitAnfragen(klamottenText, stil, jahreszeit, temperatur) {
+        try {
+          let wetterInfo = 'Jahreszeit: ' + jahreszeit;
+          if (temperatur !== null) {
+            wetterInfo = wetterInfo + ', aktuelle Temperatur: ' + temperatur + '°C';
+          }
+
+          let response = await fetch("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: "claude-sonnet-4-6",
+              max_tokens: 500,
+              messages: [
+                {
+                  role: "user",
+                  content: "Hier ist eine Liste von Kleidungsstücken (Nummer: [Kategorie] Beschreibung):\n" + klamottenText +
+                    "\n" + wetterInfo + "\n" +
+                    "\nStelle daraus EIN Outfit im Stil '" + stil + "' zusammen, das zur Jahreszeit und Temperatur passt. " +
+                    "Wähle GENAU EIN Kleidungsstück aus den Kategorien Oberteil, Hose und Schuhe (falls vorhanden). " +
+                    "Accessoire und Uhr sind optional, nimm sie nur dazu, wenn sie zum Stil passen, jeweils maximal eins. " +
+                    "Wähle NIEMALS zwei Kleidungsstücke aus derselben Kategorie. " +
+                    "Wenn der Stil auf eine bestimmte Sportart oder einen bestimmten Anlass hindeutet (z.B. 'sportlich' -> Sport-Outfit, ggf. 'Tennis-Outfit' wenn passende Klamotten da sind), nenne das im outfitName. " +
+                    "Antworte NUR mit einem JSON-Objekt, ohne Markdown, ohne Erklärtext davor oder danach, in genau diesem Format:\n" +
+                    '{ "outfitName": "kurzer Name, z.B. \'Sportliches Tennis-Outfit\'", "indices": [0, 2], "begruendung": "kurzer Satz auf Deutsch, warum das passt" }'
+                }
+              ]
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error('KI nicht erreichbar');
+          }
+
+          let data = await response.json();
+          return data.content[0].text;
+        } catch (fehler) {
+          console.log('Outfit-Anfrage fehlgeschlagen:', fehler);
+          return null;
+        }
+      }
+
+      function outfitAnzeigen(vorschlag) {
+        let ergebnisBereich = document.getElementById('outfit-ergebnis');
+
+        let karte = document.createElement('div');
+        karte.className = 'card outfit-ergebnis-card';
+
+        let name = document.createElement('p');
+        name.className = 'outfit-name';
+        name.textContent = vorschlag.outfitName || 'Dein Outfit';
+        karte.appendChild(name);
+
+        let bilderReihe = document.createElement('div');
+        bilderReihe.className = 'outfit-bilder';
+
+        for (let i = 0; i < vorschlag.indices.length; i++) {
+          let index = vorschlag.indices[i];
+          let bild = document.createElement('img');
+          bild.src = klamotten[index].bild;
+          bilderReihe.appendChild(bild);
+        }
+
+        let begruendung = document.createElement('p');
+        begruendung.className = 'outfit-begruendung';
+        begruendung.textContent = vorschlag.begruendung;
+
+        karte.appendChild(bilderReihe);
+        karte.appendChild(begruendung);
+
+        ergebnisBereich.innerHTML = '';
+        ergebnisBereich.appendChild(karte);
+      }
+
+      function loeschenAnfragen(index) {
+        zuBestaetigenIndex = index;
+        kleiderschrankAnzeigen();
+      }
+
+      function loeschenAbbrechen() {
+        zuBestaetigenIndex = null;
+        kleiderschrankAnzeigen();
+      }
+
+      function waescheUmschalten(index) {
+        klamotten[index].inWaesche = !klamotten[index].inWaesche;
+        try {
+          localStorage.setItem('klamotten', JSON.stringify(klamotten));
+        } catch (fehler) {
+          console.log('Konnte nicht gespeichert werden:', fehler);
+        }
+        kleiderschrankAnzeigen();
+      }
+
+      function klamotteLoeschen(index) {
+        klamotten.splice(index, 1);
+        zuBestaetigenIndex = null;
+        try {
+          localStorage.setItem('klamotten', JSON.stringify(klamotten));
+        } catch (fehler) {
+          console.log('Konnte nicht gespeichert werden:', fehler);
+        }
+        kleiderschrankAnzeigen();
+      }
+
+      function kleiderschrankAnzeigen() {
+        let liste = document.getElementById('kleiderschrank-liste');
+        liste.innerHTML = '';
+
+        if (klamotten.length === 0) {
+          liste.innerHTML = '<p class="leer-hinweis">Noch keine Klamotten hinzugefügt.</p>';
+          return;
+        }
+
+        for (let i = 0; i < klamotten.length; i++) {
+          let eintrag = document.createElement('div');
+          eintrag.className = 'klamotte';
+          if (klamotten[i].inWaesche) {
+            eintrag.className = 'klamotte in-waesche';
+          }
+
+          let bild = document.createElement('img');
+          bild.src = klamotten[i].bild;
+          eintrag.appendChild(bild);
+
+          if (klamotten[i].inWaesche) {
+            let abzeichen = document.createElement('span');
+            abzeichen.className = 'waesche-abzeichen';
+            abzeichen.textContent = '🧺 in der Wäsche';
+            eintrag.appendChild(abzeichen);
+          }
+
+          if (zuBestaetigenIndex === i) {
+            let overlay = document.createElement('div');
+            overlay.className = 'loesch-overlay';
+
+            let frage = document.createElement('p');
+            frage.textContent = 'Wirklich löschen?';
+            overlay.appendChild(frage);
+
+            let jaKnopf = document.createElement('button');
+            jaKnopf.className = 'overlay-knopf ja';
+            jaKnopf.textContent = 'Ja';
+            jaKnopf.onclick = function() {
+              klamotteLoeschen(i);
+            };
+
+            let neinKnopf = document.createElement('button');
+            neinKnopf.className = 'overlay-knopf nein';
+            neinKnopf.textContent = 'Nein';
+            neinKnopf.onclick = function() {
+              loeschenAbbrechen();
+            };
+
+            overlay.appendChild(jaKnopf);
+            overlay.appendChild(neinKnopf);
+            eintrag.appendChild(overlay);
+          } else {
+            let loeschKnopf = document.createElement('button');
+            loeschKnopf.className = 'loesch-knopf';
+            loeschKnopf.textContent = '✕';
+            loeschKnopf.onclick = function() {
+              loeschenAnfragen(i);
+            };
+            eintrag.appendChild(loeschKnopf);
+
+            let waescheKnopf = document.createElement('button');
+            waescheKnopf.className = 'waesche-knopf';
+            waescheKnopf.textContent = '🧺';
+            waescheKnopf.onclick = function() {
+              waescheUmschalten(i);
+            };
+            eintrag.appendChild(waescheKnopf);
+          }
+
+          let text = document.createElement('p');
+          text.textContent = klamotten[i].info;
+          eintrag.appendChild(text);
+
+          let kategorieAbzeichen = document.createElement('span');
+          kategorieAbzeichen.className = 'kategorie-abzeichen';
+          kategorieAbzeichen.textContent = klamotten[i].kategorie || 'Sonstiges';
+          eintrag.appendChild(kategorieAbzeichen);
+
+          liste.appendChild(eintrag);
+        }
+      }
+
+      kleiderschrankAnzeigen();
+    </script>
+  </body>
+</html>
