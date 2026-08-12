@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Wachstums-Tracker</title>
+<meta name="theme-color" content="#102A40" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Wachstum" />
+<link rel="icon" type="image/png" sizes="32x32" href="app-icon-32.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="app-icon-192.png" />
+<link rel="apple-touch-icon" href="app-icon-180.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="app-icon-180.png" />
+<link rel="apple-touch-icon" sizes="152x152" href="app-icon-180.png" />
+<link rel="apple-touch-icon" sizes="120x120" href="app-icon-180.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: #0B2033; }
+  #root { max-width: 940px; margin: 0 auto; padding: 24px 12px 60px; }
+
+  .gt-root {
+    --navy: #102A40;
+    --grid-line: rgba(220, 235, 245, 0.07);
+    --paper: #F3EEDF;
+    --paper-2: #EAE3CE;
+    --ink: #1C2A33;
+    --ink-soft: #4B5C66;
+    --sky: #E8F1F5;
+    --sky-muted: #7E9DB0;
+    --coral: #E8613C;
+    --mint: #5FB98C;
+    --blue: #3E7CA6;
+    font-family: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    background:
+      repeating-linear-gradient(0deg, var(--grid-line) 0px, var(--grid-line) 1px, transparent 1px, transparent 28px),
+      repeating-linear-gradient(90deg, var(--grid-line) 0px, var(--grid-line) 1px, transparent 1px, transparent 28px),
+      var(--navy);
+    color: var(--sky);
+    padding: 28px 20px 40px;
+    border-radius: 16px;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+  }
+  .gt-root * { box-sizing: border-box; }
+
+  .gt-topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+  .gt-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; color: var(--coral); text-transform: uppercase; margin: 0 0 6px; }
+  .gt-title { font-family: 'Space Grotesk', ui-sans-serif, sans-serif; font-weight: 700; font-size: clamp(24px, 4vw, 34px); margin: 0; color: var(--sky); display: flex; align-items: center; gap: 10px; }
+  .gt-headwrap { border-bottom: 1px dashed var(--sky-muted); padding-bottom: 18px; margin-bottom: 22px; }
+
+  .gt-install-hint { display: flex; align-items: center; gap: 10px; background: rgba(95,185,140,0.14); border: 1px solid rgba(95,185,140,0.35); color: var(--sky); font-size: 12.5px; line-height: 1.5; padding: 10px 12px; border-radius: 8px; margin-bottom: 16px; }
+  .gt-install-hint span { flex: 1; }
+  .gt-install-hint button { background: none; border: none; color: var(--sky-muted); cursor: pointer; font-size: 14px; flex-shrink: 0; }
+
+  .gt-save-badge { font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 5px 10px; border-radius: 999px; white-space: nowrap; animation: gt-badge-in 0.2s ease; }
+  .gt-save-badge.saved { background: rgba(95,185,140,0.16); color: #7FD4A8; }
+  .gt-save-badge.error { background: rgba(232,97,60,0.16); color: #F0997D; }
+  @keyframes gt-badge-in { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: translateY(0); } }
+
+  .gt-unit-toggle { display: inline-flex; background: rgba(232,241,245,0.08); border-radius: 999px; padding: 3px; gap: 2px; }
+  .gt-unit-toggle button { border: none; background: transparent; color: var(--sky-muted); font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 6px 12px; border-radius: 999px; cursor: pointer; font-weight: 600; }
+  .gt-unit-toggle button.active { background: var(--coral); color: white; }
+
+  .gt-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  @media (min-width: 760px) { .gt-grid { grid-template-columns: 1.05fr 1.4fr; align-items: start; } }
+  .gt-grid-2 { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 16px; }
+  @media (min-width: 760px) { .gt-grid-2 { grid-template-columns: 1fr 1fr; align-items: start; } }
+
+  .gt-card { background: var(--paper); color: var(--ink); border-radius: 10px; padding: 20px; position: relative; }
+  .gt-card::before { content: ''; position: absolute; top: 0; left: 20px; right: 20px; height: 3px; background: var(--coral); border-radius: 0 0 4px 4px; }
+  .gt-card.blue::before { background: var(--blue); }
+  .gt-card.mint::before { background: var(--mint); }
+
+  .gt-card-title { display: flex; align-items: center; gap: 8px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 17px; margin: 0 0 4px; }
+  .gt-card-sub { font-size: 12.5px; color: var(--ink-soft); margin: 0 0 14px; line-height: 1.5; }
+
+  .gt-hero-label { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.1em; margin: 6px 0 2px; }
+  .gt-hero-value { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 56px; line-height: 1; display: flex; align-items: baseline; gap: 6px; }
+  .gt-hero-unit { font-size: 22px; color: var(--ink-soft); font-weight: 500; }
+  .gt-delta { margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 4px 10px; border-radius: 999px; background: rgba(95,185,140,0.15); color: #2E7A54; }
+  .gt-delta.neg { background: rgba(232,97,60,0.12); color: #B84420; }
+
+  .gt-stats-row { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .gt-stat-chip { flex: 1; min-width: 90px; background: var(--paper-2); border-radius: 8px; padding: 8px 10px; }
+  .gt-stat-chip .n { font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 15px; }
+  .gt-stat-chip .l { font-size: 10.5px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .gt-goal-row { margin-top: 14px; }
+  .gt-goal-toggle { background: none; border: none; color: var(--coral); font-family: 'IBM Plex Mono', monospace; font-size: 12px; cursor: pointer; padding: 0; text-decoration: underline; }
+  .gt-goal-inputs { display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
+  .gt-goal-inputs input { width: 90px; font-family: 'IBM Plex Mono', monospace; padding: 7px 8px; border-radius: 6px; border: 1.5px solid var(--paper-2); }
+  .gt-progress-track { height: 8px; background: var(--paper-2); border-radius: 999px; margin-top: 10px; overflow: hidden; }
+  .gt-progress-fill { height: 100%; background: linear-gradient(90deg, var(--coral), var(--mint)); border-radius: 999px; transition: width 0.6s ease; }
+  .gt-progress-label { font-size: 11px; color: var(--ink-soft); margin-top: 4px; font-family: 'IBM Plex Mono', monospace; }
+
+  .gt-form { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+  .gt-field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 100px; }
+  .gt-field.wide { min-width: 140px; }
+  .gt-field label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); font-family: 'IBM Plex Mono', monospace; }
+  .gt-field input, .gt-field select { font-family: 'IBM Plex Mono', monospace; font-size: 15px; padding: 9px 10px; border: 1.5px solid var(--paper-2); border-radius: 6px; background: #fff; color: var(--ink); outline: none; }
+  .gt-field input:focus, .gt-field select:focus { border-color: var(--coral); }
+  .gt-btn-row { display: flex; gap: 8px; }
+  .gt-add-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--coral); color: white; border: none; font-family: 'IBM Plex Sans', sans-serif; font-weight: 600; font-size: 14px; padding: 10px 16px; border-radius: 6px; cursor: pointer; }
+  .gt-add-btn:hover { filter: brightness(1.08); }
+  .gt-add-btn:focus-visible, .gt-cancel-btn:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+  .gt-cancel-btn { background: transparent; color: var(--ink-soft); border: 1.5px solid var(--paper-2); font-family: 'IBM Plex Sans', sans-serif; font-weight: 600; font-size: 14px; padding: 9px 14px; border-radius: 6px; cursor: pointer; }
+  .gt-error { color: #B84420; font-size: 13px; margin-top: 8px; font-family: 'IBM Plex Mono', monospace; }
+
+  .gt-chart-title { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 17px; margin: 0 0 8px; }
+  .gt-hint { font-size: 11px; color: var(--ink-soft); font-family: 'IBM Plex Mono', monospace; font-weight: 400; }
+  .gt-empty { color: var(--ink-soft); font-size: 14px; padding: 30px 0; text-align: center; }
+
+  .gt-history { margin-top: 6px; max-height: 230px; overflow-y: auto; }
+  .gt-history-row { display: flex; align-items: center; gap: 8px; padding: 8px 2px; border-bottom: 1px dashed var(--paper-2); font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
+  .gt-history-row:last-child { border-bottom: none; }
+  .gt-history-date { flex: 1; }
+  .gt-history-note { flex: 1.4; color: var(--ink-soft); font-size: 12px; font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .gt-history-actions { display: flex; gap: 2px; }
+  .gt-icon-btn { background: none; border: none; color: var(--ink-soft); cursor: pointer; padding: 4px; display: flex; align-items: center; border-radius: 5px; }
+  .gt-icon-btn:hover { color: var(--coral); background: rgba(232,97,60,0.08); }
+
+  .gt-tips { margin-top: 16px; display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 640px) { .gt-tips { grid-template-columns: 1fr 1fr; } }
+  .gt-tip { background: var(--paper); color: var(--ink); border-radius: 10px; padding: 16px 18px; }
+  .gt-tip-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .gt-tip-head h4 { font-family: 'Space Grotesk', sans-serif; margin: 0; font-size: 15px; }
+  .gt-tip p { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-soft); }
+
+  .gt-toolbar { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  .gt-tool-btn { display: inline-flex; align-items: center; gap: 6px; background: rgba(232,241,245,0.08); color: var(--sky); border: 1px solid rgba(232,241,245,0.18); font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 7px 12px; border-radius: 6px; cursor: pointer; }
+  .gt-tool-btn:hover { background: rgba(232,241,245,0.16); }
+
+  .gt-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--sky); padding: 10px 14px; border-radius: 8px; display: flex; align-items: center; gap: 12px; font-size: 13px; font-family: 'IBM Plex Sans', sans-serif; box-shadow: 0 8px 24px rgba(0,0,0,0.3); z-index: 50; animation: gt-toast-in 0.25s ease; }
+  @keyframes gt-toast-in { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+  .gt-toast button { background: none; border: none; color: var(--coral); font-weight: 600; cursor: pointer; font-size: 13px; font-family: inherit; }
+
+  .gt-confetti { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .gt-confetti span { position: absolute; top: -20px; font-size: 18px; animation: gt-fall 1.4s ease-in forwards; }
+  @keyframes gt-fall { to { transform: translateY(340px) rotate(200deg); opacity: 0; } }
+
+  .gt-chart-point { cursor: pointer; }
+
+  /* Prediction card */
+  .gt-predict-inputs { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 14px; }
+  .gt-predict-result { background: var(--paper-2); border-radius: 8px; padding: 14px 16px; margin-top: 4px; }
+  .gt-predict-range { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 26px; }
+  .gt-predict-note { font-size: 11.5px; color: var(--ink-soft); margin-top: 6px; line-height: 1.5; }
+
+  /* Recommendations */
+  .gt-reco-row { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 1px dashed var(--paper-2); }
+  .gt-reco-row:last-child { border-bottom: none; }
+  .gt-reco-icon { flex-shrink: 0; width: 34px; height: 34px; border-radius: 8px; background: var(--paper-2); display: flex; align-items: center; justify-content: center; }
+  .gt-reco-title { font-weight: 600; font-size: 13.5px; margin: 0 0 2px; }
+  .gt-reco-text { font-size: 12.5px; color: var(--ink-soft); margin: 0; line-height: 1.5; }
+
+  /* Exercises */
+  .gt-ex-list { display: flex; flex-direction: column; gap: 10px; }
+  .gt-ex-item { display: flex; gap: 12px; align-items: flex-start; background: var(--paper-2); border-radius: 8px; padding: 12px 14px; }
+  .gt-ex-check { flex-shrink: 0; width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--ink-soft); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+  .gt-ex-check.done { background: var(--mint); border-color: var(--mint); }
+  .gt-ex-name { font-weight: 600; font-size: 13.5px; margin: 0 0 2px; }
+  .gt-ex-name.done { text-decoration: line-through; opacity: 0.6; }
+  .gt-ex-desc { font-size: 12.5px; color: var(--ink-soft); margin: 0; line-height: 1.5; }
+  .gt-ex-dur { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--ink-soft); background: white; padding: 2px 7px; border-radius: 999px; margin-left: auto; flex-shrink: 0; }
+  .gt-ex-progress { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--ink-soft); margin-top: 4px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gt-confetti span, .gt-toast { animation: none !important; }
+  }
+
+  @media (max-width: 480px) {
+    #root { padding: 12px 8px 40px; }
+    .gt-root { padding: 18px 14px 28px; border-radius: 12px; }
+    .gt-title { gap: 8px; }
+    .gt-hero-value { font-size: 44px; }
+    .gt-card { padding: 16px; }
+    .gt-card::before { left: 16px; right: 16px; }
+    .gt-form { gap: 8px; }
+    .gt-field { min-width: 0; flex-basis: 100%; }
+    .gt-field.wide { flex-basis: 100%; }
+    .gt-btn-row { width: 100%; }
+    .gt-btn-row .gt-add-btn { flex: 1; justify-content: center; }
+    .gt-predict-inputs .gt-field { flex-basis: calc(50% - 5px); }
+    .gt-predict-inputs .gt-field:nth-child(3) { flex-basis: 100%; }
+    .gt-ex-item { flex-wrap: wrap; }
+    .gt-ex-dur { margin-left: 34px; }
+    .gt-history-note { display: none; }
+    .gt-unit-toggle button { padding: 6px 10px; }
+    .gt-topbar { gap: 10px; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo, useRef } = React;
+const STORAGE_KEY = "growth-tracker-state-v3";
+
+const Icon = ({ path, size = 18, color = "currentColor", strokeWidth = 2 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">{path}</svg>
+);
+const RulerIcon = (p) => <Icon {...p} path={<><path d="M3 17l14-14 4 4-14 14z"/><path d="M13 6l2 2M9 10l2 2M17 6l2 2"/></>} />;
+const TrendIcon = (p) => <Icon {...p} path={<><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></>} />;
+const MoonIcon = (p) => <Icon {...p} path={<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>} />;
+const AppleIcon = (p) => <Icon {...p} path={<><path d="M12 20c-4 0-7-3-7-8 0-3 2-5 4-5 1.2 0 2 .6 3 .6s1.8-.6 3-.6c1.6 0 3 1 3.8 2.6"/><path d="M15 6c.5-1.5 2-2.5 3-2.5 0 1.8-1.2 3-3 3.2"/><path d="M19 12c0 5-3 8-7 8"/></>} />;
+const DumbbellIcon = (p) => <Icon {...p} path={<><path d="M6.5 6.5l11 11"/><path d="M21 21l-2-2M3 3l2 2"/><path d="M14 3l3 3-4 4-3-3z"/><path d="M3 14l3 3 4-4-3-3z"/></>} />;
+const DnaIcon = (p) => <Icon {...p} path={<><path d="M6 3s0 6 6 9-6 9-6 9M18 3s0 6-6 9 6 9 6 9"/><path d="M8 6h8M8 18h8"/></>} />;
+const PlusIcon = (p) => <Icon {...p} path={<><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></>} />;
+const TrashIcon = (p) => <Icon {...p} path={<><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></>} />;
+const PencilIcon = (p) => <Icon {...p} path={<><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></>} />;
+const TargetIcon = (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></>} />;
+const DownloadIcon = (p) => <Icon {...p} path={<><path d="M12 3v12"/><polyline points="6 11 12 17 18 11"/><path d="M4 20h16"/></>} />;
+const UploadIcon = (p) => <Icon {...p} path={<><path d="M12 21V9"/><polyline points="6 13 12 7 18 13"/><path d="M4 4h16"/></>} />;
+const UsersIcon = (p) => <Icon {...p} path={<><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.8-3 3-4.6 5.5-4.6s4.7 1.6 5.5 4.6"/><circle cx="17.5" cy="9" r="2.4"/><path d="M15.7 14.6c1.9.4 3.4 1.8 4 4.4"/></>} />;
+const CheckIcon = (p) => <Icon {...p} path={<polyline points="20 6 9 17 4 12"/>} />;
+const ActivityIcon = (p) => <Icon {...p} path={<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>} />;
+const StretchIcon = (p) => <Icon {...p} path={<><circle cx="12" cy="4.5" r="1.8"/><path d="M12 6.5v6l-4 8M12 12.5l4 8M6 10.5l6 2 6-2"/></>} />;
+
+const POSTURE_EXERCISES = [
+  { id: "cobra", name: "Cobra-Dehnung", dur: "20–30 Sek. × 3", desc: "Bauchlage, Hände unter den Schultern, Oberkörper langsam aufdrücken, Becken bleibt am Boden. Dehnt die Bauchmuskulatur und öffnet den Brustkorb." },
+  { id: "catcow", name: "Katze-Kuh", dur: "8–10 Wdh.", desc: "Vierfüßlerstand, abwechselnd Rücken runden (Katze) und durchhängen lassen (Kuh). Macht die Wirbelsäule beweglich und lockert den Rücken." },
+  { id: "hang", name: "Hängen an der Stange", dur: "15–20 Sek. × 3", desc: "Locker an einer Klimmzugstange hängen, Schultern entspannt. Entlastet kurzzeitig die Wirbelsäule – fühlt sich gut an, macht dich aber nicht dauerhaft größer." },
+  { id: "superman", name: "Superman", dur: "10 Wdh. × 2", desc: "Bauchlage, Arme und Beine gleichzeitig leicht abheben, kurz halten, absenken. Stärkt die Rückenmuskulatur für eine aufrechte Haltung." },
+  { id: "forward-fold", name: "Stehende Vorbeuge", dur: "20–30 Sek.", desc: "Aus dem Stand langsam nach vorne beugen, Knie leicht gebeugt, Arme hängen lassen. Dehnt die hintere Beinmuskulatur und den unteren Rücken." },
+  { id: "wall-stand", name: "Wand-Haltungscheck", dur: "1 Minute", desc: "Rücken, Schultern und Hinterkopf an eine Wand stellen, Bauch leicht anspannen. Trainiert das Gefühl für eine aufrechte Haltung im Alltag." },
+];
+
+const TIPS = [
+  { icon: MoonIcon, title: "Schlaf", text: "Das Wachstumshormon wird vor allem nachts im Tiefschlaf ausgeschüttet. Für Jugendliche werden 8–10 Stunden Schlaf empfohlen – regelmäßige Zeiten helfen mehr als ein einzelner \"Nachholschlaf\" am Wochenende." },
+  { icon: AppleIcon, title: "Ernährung", text: "Der Körper braucht Baustoffe zum Wachsen: genug Eiweiß, Calcium (Milch, Käse, Brokkoli) und Vitamin D (Sonnenlicht, Fisch). Eine ausgewogene, abwechslungsreiche Ernährung zählt mehr als ein einzelnes \"Superfood\"." },
+  { icon: DumbbellIcon, title: "Bewegung", text: "Sport und Bewegung regen den Stoffwechsel und die Ausschüttung von Wachstumshormonen an. Besonders Ballsportarten, Schwimmen oder Klettern sind gut für Knochen und Haltung – ohne Übertreibung." },
+  { icon: DnaIcon, title: "Geduld & Gene", text: "Die Körpergröße wird zu einem großen Teil durch die Gene der Eltern bestimmt. Wachstum verläuft in Schüben, oft rund um die Pubertät – ein \"Rückstand\" jetzt sagt wenig über die Endgröße aus." },
+];
+
+const cmToIn = (cm) => cm / 2.54;
+const inToCm = (inch) => inch * 2.54;
+const todayStr = () => new Date().toISOString().slice(0, 10);
+
+function useCountUp(value, duration = 600) {
+  const [display, setDisplay] = useState(value);
+  const prev = useRef(value);
+  useEffect(() => {
+    const from = prev.current;
+    const to = value;
+    if (from === to || from == null || to == null) { setDisplay(to); prev.current = to; return; }
+    const start = performance.now();
+    let raf;
+    const step = (now) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setDisplay(from + (to - from) * eased);
+      if (t < 1) raf = requestAnimationFrame(step);
+      else prev.current = to;
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [value, duration]);
+  return display;
+}
+
+function GrowthChart({ data, unit, onPointClick }) {
+  const [hover, setHover] = useState(null);
+  const w = 580, h = 250, pad = { top: 20, right: 20, bottom: 30, left: 44 };
+  const values = data.map(d => d.displayHeight);
+  const minV = Math.min(...values) - (unit === "cm" ? 3 : 1.2);
+  const maxV = Math.max(...values) + (unit === "cm" ? 3 : 1.2);
+  const x = (i) => pad.left + (i * (w - pad.left - pad.right)) / (data.length - 1 || 1);
+  const y = (val) => h - pad.bottom - ((val - minV) / (maxV - minV || 1)) * (h - pad.top - pad.bottom);
+  const points = data.map((d, i) => `${x(i)},${y(d.displayHeight)}`).join(" ");
+  const gridYs = Array.from({ length: 5 }, (_, i) => minV + (i * (maxV - minV)) / 4);
+
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} width="100%" style={{ overflow: "visible" }}>
+      {gridYs.map((gy, i) => (
+        <g key={i}>
+          <line x1={pad.left} x2={w - pad.right} y1={y(gy)} y2={y(gy)} stroke="#DCD4B8" strokeDasharray="3 4" />
+          <text x={pad.left - 8} y={y(gy) + 4} fontSize="10" fill="#4B5C66" textAnchor="end" fontFamily="IBM Plex Mono, monospace">{gy.toFixed(1)}</text>
+        </g>
+      ))}
+      <polyline points={points} fill="none" stroke="#E8613C" strokeWidth="2.5" />
+      {data.map((d, i) => (
+        <g key={i}
+           className="gt-chart-point"
+           onMouseEnter={() => setHover(i)}
+           onMouseLeave={() => setHover(null)}
+           onClick={() => onPointClick(d)}>
+          <circle cx={x(i)} cy={y(d.displayHeight)} r="10" fill="transparent" />
+          <circle cx={x(i)} cy={y(d.displayHeight)} r={hover === i ? 6 : 4} fill="#E8613C" style={{ transition: "r 0.15s" }} />
+          <text x={x(i)} y={h - pad.bottom + 16} fontSize="10" fill="#4B5C66" textAnchor="middle" fontFamily="IBM Plex Mono, monospace">{d.label}</text>
+          {hover === i && (
+            <g>
+              <rect x={x(i) - 34} y={y(d.displayHeight) - 34} width="68" height="20" rx="5" fill="#1C2A33" />
+              <text x={x(i)} y={y(d.displayHeight) - 20} fontSize="11" fill="#F3EEDF" textAnchor="middle" fontFamily="IBM Plex Mono, monospace">
+                {d.displayHeight.toFixed(1)} {unit}
+              </text>
+            </g>
+          )}
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+function Confetti({ active }) {
+  if (!active) return null;
+  const emojis = ["🎉", "📏", "✨", "🎊", "⭐"];
+  const pieces = Array.from({ length: 14 }, (_, i) => ({ id: i, left: Math.random() * 100, delay: Math.random() * 0.3, emoji: emojis[i % emojis.length] }));
+  return <div className="gt-confetti">{pieces.map(p => <span key={p.id} style={{ left: `${p.left}%`, animationDelay: `${p.delay}s` }}>{p.emoji}</span>)}</div>;
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { entries: [], unit: "cm", goal: null, father: "", mother: "", gender: "m", exLog: {} };
+    const p = JSON.parse(raw);
+    return {
+      entries: Array.isArray(p.entries) ? p.entries : [],
+      unit: p.unit === "in" ? "in" : "cm",
+      goal: typeof p.goal === "number" ? p.goal : null,
+      father: p.father || "",
+      mother: p.mother || "",
+      gender: p.gender === "w" ? "w" : "m",
+      exLog: p.exLog && typeof p.exLog === "object" ? p.exLog : {},
+    };
+  } catch (e) { return { entries: [], unit: "cm", goal: null, father: "", mother: "", gender: "m", exLog: {} }; }
+}
+
+function GrowthTracker() {
+  const init = useRef(loadState()).current;
+  const [entries, setEntries] = useState(init.entries);
+  const [unit, setUnit] = useState(init.unit);
+  const [goal, setGoal] = useState(init.goal);
+  const [showGoalInput, setShowGoalInput] = useState(false);
+  const [goalDraft, setGoalDraft] = useState("");
+
+  const [father, setFather] = useState(init.father);
+  const [mother, setMother] = useState(init.mother);
+  const [gender, setGender] = useState(init.gender);
+
+  const [exLog, setExLog] = useState(init.exLog);
+
+  const [date, setDate] = useState(todayStr());
+  const [heightInput, setHeightInput] = useState("");
+  const [note, setNote] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [error, setError] = useState("");
+  const [toast, setToast] = useState(null);
+  const [celebrate, setCelebrate] = useState(false);
+  const toastTimer = useRef(null);
+  const fileInputRef = useRef(null);
+  const [showInstallHint, setShowInstallHint] = useState(() => {
+    try {
+      const isSmall = window.innerWidth < 640;
+      const dismissed = localStorage.getItem("gt-install-hint-dismissed");
+      const isStandalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
+      return isSmall && !dismissed && !isStandalone;
+    } catch (e) { return false; }
+  });
+
+  const [saveStatus, setSaveStatus] = useState("idle"); // idle | saved | error
+  const isFirstSave = useRef(true);
+  const saveFlashTimer = useRef(null);
+
+  useEffect(() => {
+    if (isFirstSave.current) { isFirstSave.current = false; return; }
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ entries, unit, goal, father, mother, gender, exLog }));
+      setSaveStatus("saved");
+    } catch (e) {
+      setSaveStatus("error");
+    }
+    if (saveFlashTimer.current) clearTimeout(saveFlashTimer.current);
+    saveFlashTimer.current = setTimeout(() => setSaveStatus("idle"), 1800);
+  }, [entries, unit, goal, father, mother, gender, exLog]);
+
+  useEffect(() => {
+    if (!celebrate) return;
+    const t = setTimeout(() => setCelebrate(false), 1400);
+    return () => clearTimeout(t);
+  }, [celebrate]);
+
+  const sorted = useMemo(() => [...entries].sort((a, b) => new Date(a.date) - new Date(b.date)), [entries]);
+  const latest = sorted[sorted.length - 1];
+  const previous = sorted[sorted.length - 2];
+  const delta = latest && previous ? +(latest.height - previous.height).toFixed(2) : null;
+
+  const displayVal = (cm) => (unit === "cm" ? cm : cmToIn(cm));
+  const heroDisplay = useCountUp(latest ? displayVal(latest.height) : 0);
+
+  const rateLabel = useMemo(() => {
+    if (sorted.length < 2) return "–";
+    const first = sorted[0], last = sorted[sorted.length - 1];
+    const months = (new Date(last.date) - new Date(first.date)) / (1000 * 60 * 60 * 24 * 30.44);
+    if (months <= 0) return "–";
+    const rate = (last.height - first.height) / months;
+    return `${rate >= 0 ? "+" : ""}${displayVal(rate).toFixed(2)} ${unit}/Monat`;
+  }, [sorted, unit]);
+
+  const goalProgress = useMemo(() => {
+    if (goal == null || sorted.length === 0) return null;
+    const first = sorted[0].height;
+    const cur = sorted[sorted.length - 1].height;
+    if (goal <= first) return null;
+    const pct = Math.max(0, Math.min(100, ((cur - first) / (goal - first)) * 100));
+    return { pct, remaining: Math.max(0, goal - cur) };
+  }, [goal, sorted]);
+
+  const prediction = useMemo(() => {
+    const f = parseFloat(String(father).replace(",", "."));
+    const m = parseFloat(String(mother).replace(",", "."));
+    if (isNaN(f) || isNaN(m) || f < 120 || f > 220 || m < 120 || m > 220) return null;
+    const mid = gender === "m" ? (f + m + 13) / 2 : (f + m - 13) / 2;
+    return { low: mid - 8.5, high: mid + 8.5, mid };
+  }, [father, mother, gender]);
+
+  function showToast(message, action) {
+    setToast({ message, action });
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 5000);
+  }
+
+  function resetForm() {
+    setHeightInput(""); setNote(""); setEditingId(null); setError(""); setDate(todayStr());
+  }
+
+  function submitEntry() {
+    setError("");
+    const raw = parseFloat(heightInput.replace(",", "."));
+    if (!date) { setError("Bitte ein Datum wählen."); return; }
+    if (isNaN(raw)) { setError(`Bitte eine Zahl in ${unit} eingeben.`); return; }
+    const cm = unit === "cm" ? raw : inToCm(raw);
+    if (cm < 50 || cm > 230) { setError("Das klingt nicht nach einer realistischen Körpergröße – bitte prüfen."); return; }
+
+    const prevMax = sorted.length ? Math.max(...sorted.map(e => e.height)) : -Infinity;
+
+    if (editingId) {
+      setEntries(entries.map(e => e.id === editingId ? { ...e, date, height: cm, note } : e));
+    } else {
+      const withoutSameDate = entries.filter(e => e.date !== date);
+      setEntries([...withoutSameDate, { id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), date, height: cm, note }]);
+      if (cm > prevMax) setCelebrate(true);
+    }
+    resetForm();
+  }
+
+  function startEdit(entry) {
+    setEditingId(entry.id); setDate(entry.date); setHeightInput(displayVal(entry.height).toFixed(1)); setNote(entry.note || ""); setError("");
+  }
+
+  function removeEntry(id) {
+    const removed = entries.find(e => e.id === id);
+    setEntries(entries.filter(e => e.id !== id));
+    if (editingId === id) resetForm();
+    showToast("Eintrag gelöscht.", { label: "Rückgängig", onClick: () => { setEntries(prev => [...prev, removed]); setToast(null); } });
+  }
+
+  function exportData() {
+    const blob = new Blob([JSON.stringify({ entries, unit, goal, father, mother, gender }, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "wachstums-daten.json"; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importData(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        const incoming = Array.isArray(parsed.entries) ? parsed.entries : Array.isArray(parsed) ? parsed : null;
+        if (!incoming) throw new Error("bad format");
+        const byDate = {};
+        [...entries, ...incoming].forEach(en => { if (en && en.date && typeof en.height === "number") byDate[en.date] = { ...en, id: en.id || (crypto.randomUUID ? crypto.randomUUID() : String(Math.random())) }; });
+        setEntries(Object.values(byDate));
+        showToast("Daten importiert.", null);
+      } catch (err) { showToast("Import fehlgeschlagen – ungültige Datei.", null); }
+    };
+    reader.readAsText(file);
+  }
+
+  function toggleExercise(id) {
+    const t = todayStr();
+    setExLog(prev => {
+      const dayLog = { ...(prev[t] || {}) };
+      dayLog[id] = !dayLog[id];
+      return { ...prev, [t]: dayLog };
+    });
+  }
+
+  const todayLog = exLog[todayStr()] || {};
+  const doneCount = POSTURE_EXERCISES.filter(e => todayLog[e.id]).length;
+
+  const chartData = sorted.map(e => ({
+    date: e.date,
+    label: new Date(e.date).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" }),
+    height: e.height,
+    displayHeight: displayVal(e.height),
+    note: e.note,
+    id: e.id,
+  }));
+
+  return (
+    <div className="gt-root">
+      <Confetti active={celebrate} />
+      <div className="gt-headwrap">
+        <div className="gt-topbar">
+          <div>
+            <p className="gt-eyebrow">Wachstumsprotokoll · Persönlich</p>
+            <h1 className="gt-title"><RulerIcon size={26} color="#E8F1F5" />Wachstums-Tracker</h1>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {saveStatus === "saved" && <span className="gt-save-badge saved">✓ Lokal gespeichert</span>}
+            {saveStatus === "error" && <span className="gt-save-badge error">⚠ Speichern blockiert (privater Modus?)</span>}
+            <div className="gt-unit-toggle" role="group" aria-label="Einheit wählen">
+              <button className={unit === "cm" ? "active" : ""} onClick={() => setUnit("cm")}>cm</button>
+              <button className={unit === "in" ? "active" : ""} onClick={() => setUnit("in")}>in</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {showInstallHint && (
+        <div className="gt-install-hint">
+          <span>📲 Tipp: Über das Browser-Menü <strong>„Zum Home-Bildschirm“</strong> wählen, dann startet die App direkt mit eigenem Icon.</span>
+          <button onClick={() => { setShowInstallHint(false); try { localStorage.setItem("gt-install-hint-dismissed", "1"); } catch (e) {} }} aria-label="Hinweis schließen">✕</button>
+        </div>
+      )}
+
+      <div className="gt-grid">
+        <div className="gt-card">
+          <div className="gt-hero-label">Aktuelle Größe</div>
+          <div className="gt-hero-value">{latest ? heroDisplay.toFixed(1) : "–"}<span className="gt-hero-unit">{unit}</span></div>
+          {delta !== null && (
+            <span className={`gt-delta ${delta < 0 ? "neg" : ""}`}><TrendIcon size={14} /> {delta > 0 ? "+" : ""}{displayVal(delta).toFixed(2)} {unit} seit letzter Messung</span>
+          )}
+
+          <div className="gt-stats-row">
+            <div className="gt-stat-chip"><div className="n">{sorted.length}</div><div className="l">Einträge</div></div>
+            <div className="gt-stat-chip"><div className="n">{rateLabel}</div><div className="l">Tempo</div></div>
+          </div>
+
+          <div className="gt-goal-row">
+            {!showGoalInput && goal == null && (
+              <button className="gt-goal-toggle" onClick={() => setShowGoalInput(true)}><TargetIcon size={12} style={{verticalAlign: -2, marginRight: 4}} />Ziel setzen (optional)</button>
+            )}
+            {!showGoalInput && goal != null && goalProgress && (
+              <>
+                <div className="gt-progress-track"><div className="gt-progress-fill" style={{ width: `${goalProgress.pct}%` }} /></div>
+                <div className="gt-progress-label">
+                  {goalProgress.pct.toFixed(0)}% auf dem Weg zu {displayVal(goal).toFixed(1)} {unit}
+                  {" · "}<button className="gt-goal-toggle" onClick={() => setGoal(null)}>entfernen</button>
+                </div>
+              </>
+            )}
+            {showGoalInput && (
+              <div className="gt-goal-inputs">
+                <input type="text" inputMode="decimal" placeholder={unit} value={goalDraft} onChange={e => setGoalDraft(e.target.value)} />
+                <button className="gt-add-btn" style={{ padding: "7px 12px" }} onClick={() => {
+                  const v = parseFloat(goalDraft.replace(",", "."));
+                  if (!isNaN(v)) setGoal(unit === "cm" ? v : inToCm(v));
+                  setShowGoalInput(false); setGoalDraft("");
+                }}>Speichern</button>
+                <button className="gt-cancel-btn" onClick={() => { setShowGoalInput(false); setGoalDraft(""); }}>Abbrechen</button>
+              </div>
+            )}
+          </div>
+
+          <div className="gt-form">
+            <div className="gt-field">
+              <label htmlFor="gt-date">Datum</label>
+              <input id="gt-date" type="date" value={date} max={todayStr()} onChange={e => setDate(e.target.value)} />
+            </div>
+            <div className="gt-field">
+              <label htmlFor="gt-height">Größe ({unit})</label>
+              <input id="gt-height" type="text" inputMode="decimal" placeholder={unit === "cm" ? "z.B. 152.5" : "z.B. 60.0"} value={heightInput} onChange={e => setHeightInput(e.target.value)} />
+            </div>
+            <div className="gt-field wide">
+              <label htmlFor="gt-note">Notiz (optional)</label>
+              <input id="gt-note" type="text" placeholder="z.B. nach den Ferien" value={note} onChange={e => setNote(e.target.value)} />
+            </div>
+            <div className="gt-btn-row">
+              <button className="gt-add-btn" onClick={submitEntry}>
+                {editingId ? <PencilIcon size={16} color="#fff" /> : <PlusIcon size={16} color="#fff" />}
+                {editingId ? "Speichern" : "Eintragen"}
+              </button>
+              {editingId && <button className="gt-cancel-btn" onClick={resetForm}>Abbrechen</button>}
+            </div>
+          </div>
+          {error && <div className="gt-error">{error}</div>}
+
+          {sorted.length > 0 && (
+            <div className="gt-history">
+              {[...sorted].reverse().map(e => (
+                <div className="gt-history-row" key={e.id}>
+                  <span className="gt-history-date">{new Date(e.date).toLocaleDateString("de-DE")}</span>
+                  <span>{displayVal(e.height).toFixed(1)} {unit}</span>
+                  <span className="gt-history-note">{e.note || ""}</span>
+                  <div className="gt-history-actions">
+                    <button className="gt-icon-btn" onClick={() => startEdit(e)} aria-label="Eintrag bearbeiten"><PencilIcon size={14} /></button>
+                    <button className="gt-icon-btn" onClick={() => removeEntry(e.id)} aria-label="Eintrag löschen"><TrashIcon size={14} /></button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="gt-toolbar">
+            <button className="gt-tool-btn" onClick={exportData}><DownloadIcon size={13} /> Export</button>
+            <button className="gt-tool-btn" onClick={() => fileInputRef.current && fileInputRef.current.click()}><UploadIcon size={13} /> Import</button>
+            <input ref={fileInputRef} type="file" accept="application/json" style={{ display: "none" }}
+              onChange={e => { if (e.target.files[0]) importData(e.target.files[0]); e.target.value = ""; }} />
+          </div>
+        </div>
+
+        <div className="gt-card">
+          <h3 className="gt-chart-title">
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}><TrendIcon size={18} /> Verlauf</span>
+            {chartData.length >= 2 && <span className="gt-hint">Klick auf einen Punkt zum Bearbeiten</span>}
+          </h3>
+          {chartData.length >= 2 ? (
+            <GrowthChart data={chartData} unit={unit} onPointClick={(d) => { const entry = sorted.find(e => e.id === d.id); if (entry) startEdit(entry); }} />
+          ) : (
+            <div className="gt-empty">Trag mindestens zwei Messungen ein, um deinen Wachstumsverlauf als Kurve zu sehen.</div>
+          )}
+        </div>
+      </div>
+
+      <div className="gt-grid-2">
+        <div className="gt-card blue">
+          <h3 className="gt-card-title"><UsersIcon size={18} color="#3E7CA6" /> Größenprognose</h3>
+          <p className="gt-card-sub">Grobe statistische Schätzung anhand der Größe deiner Eltern (Tanner-Formel). Keine Garantie – Ernährung, Schlaf und individuelle Entwicklung spielen ebenfalls eine große Rolle.</p>
+          <div className="gt-predict-inputs">
+            <div className="gt-field">
+              <label>Vater (cm)</label>
+              <input type="text" inputMode="decimal" placeholder="z.B. 180" value={father} onChange={e => setFather(e.target.value)} />
+            </div>
+            <div className="gt-field">
+              <label>Mutter (cm)</label>
+              <input type="text" inputMode="decimal" placeholder="z.B. 167" value={mother} onChange={e => setMother(e.target.value)} />
+            </div>
+            <div className="gt-field">
+              <label>Geschlecht</label>
+              <select value={gender} onChange={e => setGender(e.target.value)}>
+                <option value="m">Junge</option>
+                <option value="w">Mädchen</option>
+              </select>
+            </div>
+          </div>
+          {prediction ? (
+            <div className="gt-predict-result">
+              <div className="gt-predict-range">{displayVal(prediction.low).toFixed(0)}–{displayVal(prediction.high).toFixed(0)} {unit}</div>
+              <div className="gt-predict-note">Geschätzte Erwachsenengröße, Mittelwert ca. {displayVal(prediction.mid).toFixed(0)} {unit}. Diese Formel liegt bei den meisten Menschen innerhalb weniger cm richtig, kann aber daneben liegen.</div>
+            </div>
+          ) : (
+            <div className="gt-predict-note">Trag beide Elterngrößen ein, um eine Schätzung zu sehen.</div>
+          )}
+        </div>
+
+        <div className="gt-card mint">
+          <h3 className="gt-card-title"><ActivityIcon size={18} color="#5FB98C" /> Tagesempfehlungen</h3>
+          <p className="gt-card-sub">Das unterstützt gesundes Wachstum am meisten – ganz ohne Trend oder Trick.</p>
+          <div className="gt-reco-row">
+            <div className="gt-reco-icon"><MoonIcon size={16} color="#1C2A33" /></div>
+            <div><p className="gt-reco-title">8–10 Stunden Schlaf</p><p className="gt-reco-text">Möglichst zu regelmäßigen Zeiten, auch am Wochenende – hier passiert der Großteil der Wachstumshormon-Ausschüttung.</p></div>
+          </div>
+          <div className="gt-reco-row">
+            <div className="gt-reco-icon"><DumbbellIcon size={16} color="#1C2A33" /></div>
+            <div><p className="gt-reco-title">Mind. 60 Minuten Bewegung</p><p className="gt-reco-text">Am besten täglich, mittlere bis hohe Intensität – z.B. Sportverein, Rad fahren, Ballspiele. Dazu 2–3× pro Woche etwas, das Knochen und Muskeln fordert.</p></div>
+          </div>
+          <div className="gt-reco-row">
+            <div className="gt-reco-icon"><AppleIcon size={16} color="#1C2A33" /></div>
+            <div><p className="gt-reco-title">Regelmäßige Mahlzeiten</p><p className="gt-reco-text">Drei Hauptmahlzeiten mit Eiweiß, Milchprodukten und viel Gemüse/Obst liefern die Baustoffe fürs Wachstum.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="gt-card" style={{ marginTop: 16 }}>
+        <h3 className="gt-card-title"><StretchIcon size={18} color="#E8613C" /> Haltungs-Routine</h3>
+        <p className="gt-card-sub">Ehrlicher Hinweis: Diese Übungen machen dich nicht größer (das entscheiden Wachstumsfugen, nicht Muskeln) – aber sie verbessern deine Haltung, sodass du aufrechter und damit größer <em>wirkst</em>, und sie halten deinen Rücken gesund.</p>
+        <div className="gt-ex-progress">Heute erledigt: {doneCount}/{POSTURE_EXERCISES.length}</div>
+        <div className="gt-ex-list" style={{ marginTop: 10 }}>
+          {POSTURE_EXERCISES.map(ex => {
+            const done = !!todayLog[ex.id];
+            return (
+              <div className="gt-ex-item" key={ex.id}>
+                <button className={`gt-ex-check ${done ? "done" : ""}`} onClick={() => toggleExercise(ex.id)} aria-label={`${ex.name} erledigt`}>
+                  {done && <CheckIcon size={13} color="#fff" strokeWidth={3} />}
+                </button>
+                <div style={{ flex: 1 }}>
+                  <p className={`gt-ex-name ${done ? "done" : ""}`}>{ex.name}</p>
+                  <p className="gt-ex-desc">{ex.desc}</p>
+                </div>
+                <span className="gt-ex-dur">{ex.dur}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="gt-tips">
+        {TIPS.map(t => (
+          <div className="gt-tip" key={t.title}>
+            <div className="gt-tip-head"><t.icon size={18} color="#E8613C" /><h4>{t.title}</h4></div>
+            <p>{t.text}</p>
+          </div>
+        ))}
+      </div>
+
+      {toast && (
+        <div className="gt-toast" role="status">
+          <span>{toast.message}</span>
+          {toast.action && <button onClick={toast.action.onClick}>{toast.action.label}</button>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<GrowthTracker />);
+</script>
+</body>
+</html>
