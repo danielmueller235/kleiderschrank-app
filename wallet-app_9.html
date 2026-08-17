@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Wallet">
+<link rel="apple-touch-icon" href="wallet-icon.png">
+<title>Meine Wallet</title>
+<style>
+  :root {
+    --bg: #0B0B14;
+    --bg-card: #15141F;
+    --bg-card-2: #1C1B29;
+    --purple: #AB9FF2;
+    --purple-glow: #7B6FE8;
+    --text: #F3F1FA;
+    --text-dim: #8A879C;
+    --red: #FF5C6C;
+    --green: #3FE0A5;
+    --border: #26243A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: #0B0B14;
+    background-image: radial-gradient(circle at 50% 0%, #1A1830 0%, #0B0B14 55%);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+    min-height: 100vh;
+    padding: calc(20px + env(safe-area-inset-top)) 16px calc(100px + env(safe-area-inset-bottom)) 16px;
+  }
+
+  .wallet-header { text-align: center; padding: 18px 0 8px 0; }
+  .wallet-label { font-size: 13px; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; }
+  .wallet-balance {
+    font-size: 44px;
+    font-weight: 700;
+    margin-top: 6px;
+    letter-spacing: -1px;
+    color: var(--text);
+  }
+  .wallet-sub { margin-top: 6px; font-size: 14px; font-weight: 600; color: var(--text-dim); }
+  .wallet-sub.hat-bewegung { color: var(--text-dim); }
+  .prozent-badge {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .prozent-badge.positiv { background: rgba(63,224,165,0.15); color: var(--green); }
+  .prozent-badge.negativ { background: rgba(255,92,108,0.15); color: var(--red); }
+  .rang-prozent {
+    font-size: 12px;
+    font-weight: 700;
+    margin-left: 8px;
+    white-space: nowrap;
+  }
+  .rang-prozent.positiv { color: var(--green); }
+  .rang-prozent.negativ { color: var(--red); }
+
+  .chart-card {
+    margin-top: 18px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 14px;
+  }
+  #sparkline { width: 100%; height: 90px; display: block; }
+  .chart-leer { text-align: center; color: var(--text-dim); font-size: 13px; padding: 30px 0; }
+
+  .start-card {
+    margin-top: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .start-card label { font-size: 13px; color: var(--text-dim); white-space: nowrap; }
+  .start-card input {
+    flex: 1;
+    background: var(--bg-card-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    padding: 8px 10px;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: right;
+  }
+  .start-card button {
+    background: var(--purple);
+    border: none;
+    color: #14121F;
+    font-weight: 700;
+    padding: 9px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+  }
+
+  .add-btn {
+    margin-top: 16px;
+    width: 100%;
+    background: var(--purple);
+    color: #14121F;
+    border: none;
+    padding: 15px;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .form-card {
+    display: none;
+    margin-top: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+  }
+  .form-card.aktiv { display: block; }
+
+  .typ-umschalter {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    background: var(--bg-card-2);
+    border-radius: 12px;
+    padding: 4px;
+  }
+  .typ-btn {
+    flex: 1;
+    padding: 10px 4px;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--text-dim);
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .typ-btn.ausgewaehlt-ausgabe { background: var(--red); color: #14121F; }
+  .typ-btn.ausgewaehlt-einzahlung { background: var(--green); color: #14121F; }
+
+  .form-row { margin-bottom: 10px; }
+  .form-row label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px; }
+  .form-row input, .form-row select {
+    width: 100%;
+    background: var(--bg-card-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    padding: 10px;
+    font-size: 15px;
+  }
+  .fehler-text {
+    font-size: 12px;
+    color: var(--red);
+    margin-top: 4px;
+    display: none;
+  }
+  .fehler-text.sichtbar { display: block; }
+
+  .kategorie-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .kategorie-btn {
+    background: var(--bg-card-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 4px;
+    text-align: center;
+    font-size: 20px;
+  }
+  .kategorie-btn.ausgewaehlt { border-color: var(--purple); background: rgba(171,159,242,0.15); }
+  .kategorie-btn span { display: block; font-size: 10px; color: var(--text-dim); margin-top: 3px; }
+
+  .form-buttons { display: flex; gap: 8px; margin-top: 12px; }
+  .form-buttons button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: 700; font-size: 14px; }
+  .btn-speichern { background: var(--purple); color: #14121F; }
+  .btn-abbrechen { background: var(--bg-card-2); color: var(--text-dim); border: 1px solid var(--border); }
+
+  .section-label {
+    margin-top: 24px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .tx-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+  .tx-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-card-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .tx-mitte { flex: 1; min-width: 0; }
+  .tx-name { font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tx-datum { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+  .tx-betrag { font-size: 15px; font-weight: 700; color: var(--red); white-space: nowrap; }
+  .tx-betrag.einzahlung { color: var(--green); }
+  .tx-loeschen { background: none; border: none; color: var(--text-dim); font-size: 18px; padding: 4px 8px; }
+  .leer-hinweis { text-align: center; color: var(--text-dim); font-size: 14px; padding: 30px 10px; }
+
+  .freunde-card {
+    margin-top: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+  }
+  .mini-btn {
+    background: var(--bg-card-2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .rang-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .rang-row:last-child { border-bottom: none; }
+  .rang-row.ich { background: rgba(171,159,242,0.1); border-radius: 10px; }
+  .rang-platz {
+    width: 24px;
+    text-align: center;
+    font-weight: 700;
+    color: var(--text-dim);
+    font-size: 14px;
+  }
+  .rang-name { flex: 1; font-size: 14px; font-weight: 600; }
+  .rang-betrag { font-size: 14px; font-weight: 700; color: var(--purple); }
+  .avatar-ghost {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+</style>
+</head>
+<body>
+
+  <div class="wallet-header">
+    <div class="wallet-label">Guthaben</div>
+    <div class="wallet-balance" id="balance-anzeige">0,00 €</div>
+    <div class="prozent-badge" id="prozent-badge" style="display:none;"></div>
+    <div class="wallet-sub" id="balance-sub">Noch keine Einträge erfasst</div>
+  </div>
+
+  <div class="chart-card">
+    <svg id="sparkline" viewBox="0 0 300 90" preserveAspectRatio="none"></svg>
+    <div class="chart-leer" id="chart-leer">Noch nicht genug Daten für einen Verlauf</div>
+  </div>
+
+  <div class="start-card">
+    <label for="start-input">Guthaben hinzufügen</label>
+    <input type="number" id="start-input" placeholder="z.B. 12,50" step="0.01" inputmode="decimal">
+    <button type="button" id="start-setzen-btn">Hinzufügen</button>
+  </div>
+
+  <div class="freunde-card" id="freunde-beitreten-card">
+    <div class="section-label" style="margin-top:0;">Freunde-Rangliste</div>
+    <div class="form-row">
+      <label for="freunde-name-input">Dein Name</label>
+      <input type="text" id="freunde-name-input" placeholder="z.B. Daniel">
+    </div>
+    <div class="form-row">
+      <label for="freunde-code-input">Gruppen-Code (mit Freunden ausmachen)</label>
+      <input type="text" id="freunde-code-input" placeholder="z.B. klasse8b">
+    </div>
+    <div class="fehler-text" id="freunde-fehler">Bitte Name und Code eingeben.</div>
+    <button type="button" class="add-btn" id="freunde-beitreten-btn" style="margin-top:8px;">Rangliste beitreten</button>
+  </div>
+
+  <div class="freunde-card" id="freunde-rangliste-card" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+      <div class="section-label" style="margin:0;">Rangliste · <span id="freunde-code-anzeige"></span></div>
+      <button type="button" id="freunde-verlassen-btn" class="mini-btn">Verlassen</button>
+    </div>
+    <div id="rangliste-liste"></div>
+  </div>
+
+  <button type="button" class="add-btn" id="add-btn">＋ Eintrag hinzufügen</button>
+
+  <div class="form-card" id="form-card">
+    <div class="typ-umschalter">
+      <button type="button" class="typ-btn ausgewaehlt-ausgabe" id="typ-btn-ausgabe">− Ausgabe</button>
+      <button type="button" class="typ-btn" id="typ-btn-einzahlung">+ Einzahlung</button>
+    </div>
+    <div class="form-row">
+      <label id="name-label">Was hast du gekauft?</label>
+      <input type="text" id="name-input" placeholder="z.B. Döner">
+      <div class="fehler-text" id="name-fehler">Bitte einen Namen eingeben.</div>
+    </div>
+    <div class="form-row">
+      <label>Betrag (€)</label>
+      <input type="number" id="betrag-input" placeholder="0.00" step="0.01" inputmode="decimal">
+      <div class="fehler-text" id="betrag-fehler">Bitte einen Betrag über 0 eingeben.</div>
+    </div>
+    <div class="form-row" id="kategorie-row">
+      <label>Kategorie</label>
+      <div class="kategorie-grid" id="kategorie-grid"></div>
+    </div>
+    <div class="form-buttons">
+      <button type="button" class="btn-abbrechen" id="abbrechen-btn">Abbrechen</button>
+      <button type="button" class="btn-speichern" id="speichern-btn">Speichern</button>
+    </div>
+  </div>
+
+  <div class="section-label">Letzte Einträge</div>
+  <div id="tx-liste"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+  var firebaseConfig = {
+    apiKey: "AIzaSyD6fRPIwGMZL1neAyeVzjvybbX3UzqVvLE",
+    authDomain: "sparen-439c4.firebaseapp.com",
+    projectId: "sparen-439c4",
+    storageBucket: "sparen-439c4.firebasestorage.app",
+    messagingSenderId: "525716421636",
+    appId: "1:525716421636:web:2958875c81b2c0aa458951"
+  };
+  firebase.initializeApp(firebaseConfig);
+  var db = firebase.firestore();
+</script>
+<script>
+(function() {
+
+  var kategorien = [
+    { id: 'essen', icon: '🍔', name: 'Essen' },
+    { id: 'kleidung', icon: '👕', name: 'Kleidung' },
+    { id: 'transport', icon: '🚌', name: 'Transport' },
+    { id: 'spass', icon: '🎮', name: 'Spaß' },
+    { id: 'schule', icon: '📚', name: 'Schule' },
+    { id: 'sonstiges', icon: '📦', name: 'Sonstiges' },
+    { id: 'sport', icon: '⚽', name: 'Sport' },
+    { id: 'geschenk', icon: '🎁', name: 'Geschenk' }
+  ];
+
+  var gewaehlteKategorie = 'sonstiges';
+  var gewaehlterTyp = 'ausgabe';
+
+  var eintraege = [];
+  try {
+    eintraege = JSON.parse(localStorage.getItem('wallet_eintraege')) || [];
+  } catch (fehler) {
+    eintraege = [];
+  }
+  // Alte Daten aus einer früheren Version (falls vorhanden) übernehmen
+  if (eintraege.length === 0) {
+    try {
+      var alteAusgaben = JSON.parse(localStorage.getItem('wallet_ausgaben')) || [];
+      alteAusgaben.forEach(function(a) {
+        if (!a.typ) a.typ = 'ausgabe';
+      });
+      eintraege = alteAusgaben;
+    } catch (fehler) {
+      eintraege = [];
+    }
+  }
+
+  var startguthaben = parseFloat(localStorage.getItem('wallet_start')) || 0;
+
+  function speichern() {
+    localStorage.setItem('wallet_eintraege', JSON.stringify(eintraege));
+    localStorage.setItem('wallet_start', String(startguthaben));
+  }
+
+  function euroText(zahl) {
+    var vorzeichen = zahl < 0 ? '-' : '';
+    return vorzeichen + Math.abs(zahl).toFixed(2).replace('.', ',') + ' €';
+  }
+
+  function prozentBerechnen(start, aktuell) {
+    if (!start || start === 0) return null;
+    return ((aktuell - start) / start) * 100;
+  }
+
+  function prozentText(prozent) {
+    var vorzeichen = prozent >= 0 ? '+' : '';
+    return vorzeichen + prozent.toFixed(1).replace('.', ',') + ' %';
+  }
+
+  function kategorieIcon(id) {
+    if (id === 'einzahlung') return '💰';
+    for (var i = 0; i < kategorien.length; i++) {
+      if (kategorien[i].id === id) return kategorien[i].icon;
+    }
+    return '📦';
+  }
+
+  function datumText(isoString) {
+    var d = new Date(isoString);
+    var datumTeil = d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+    var zeitTeil = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    return datumTeil + ' · ' + zeitTeil;
+  }
+
+  function kategorieGridBauen() {
+    var grid = document.getElementById('kategorie-grid');
+    grid.innerHTML = '';
+    kategorien.forEach(function(kat) {
+      var btn = document.createElement('div');
+      btn.className = 'kategorie-btn' + (kat.id === gewaehlteKategorie ? ' ausgewaehlt' : '');
+      btn.innerHTML = kat.icon + '<span>' + kat.name + '</span>';
+      btn.addEventListener('click', function() {
+        gewaehlteKategorie = kat.id;
+        kategorieGridBauen();
+      });
+      grid.appendChild(btn);
+    });
+  }
+
+  function typWaehlen(typ) {
+    gewaehlterTyp = typ;
+    var btnAusgabe = document.getElementById('typ-btn-ausgabe');
+    var btnEinzahlung = document.getElementById('typ-btn-einzahlung');
+    var kategorieRow = document.getElementById('kategorie-row');
+    var nameLabel = document.getElementById('name-label');
+
+    if (typ === 'ausgabe') {
+      btnAusgabe.classList.add('ausgewaehlt-ausgabe');
+      btnEinzahlung.classList.remove('ausgewaehlt-einzahlung');
+      kategorieRow.style.display = 'block';
+      nameLabel.textContent = 'Was hast du gekauft?';
+    } else {
+      btnEinzahlung.classList.add('ausgewaehlt-einzahlung');
+      btnAusgabe.classList.remove('ausgewaehlt-ausgabe');
+      kategorieRow.style.display = 'none';
+      nameLabel.textContent = 'Woher kommt das Geld?';
+    }
+  }
+
+  function formOeffnen() {
+    document.getElementById('form-card').classList.add('aktiv');
+  }
+
+  function formSchliessen() {
+    document.getElementById('form-card').classList.remove('aktiv');
+    document.getElementById('name-input').value = '';
+    document.getElementById('betrag-input').value = '';
+    document.getElementById('name-fehler').classList.remove('sichtbar');
+    document.getElementById('betrag-fehler').classList.remove('sichtbar');
+    gewaehlteKategorie = 'sonstiges';
+    kategorieGridBauen();
+    typWaehlen('ausgabe');
+  }
+
+  function eintragSpeichern() {
+    var nameInput = document.getElementById('name-input');
+    var betragInput = document.getElementById('betrag-input');
+    var nameFehler = document.getElementById('name-fehler');
+    var betragFehler = document.getElementById('betrag-fehler');
+
+    var name = nameInput.value.trim();
+    var betrag = parseFloat(betragInput.value);
+
+    var istGueltig = true;
+
+    if (name === '') {
+      nameFehler.classList.add('sichtbar');
+      istGueltig = false;
+    } else {
+      nameFehler.classList.remove('sichtbar');
+    }
+
+    if (isNaN(betrag) || betrag <= 0) {
+      betragFehler.classList.add('sichtbar');
+      istGueltig = false;
+    } else {
+      betragFehler.classList.remove('sichtbar');
+    }
+
+    if (!istGueltig) return;
+
+    eintraege.unshift({
+      name: name,
+      betrag: betrag,
+      typ: gewaehlterTyp,
+      kategorie: gewaehlterTyp === 'ausgabe' ? gewaehlteKategorie : 'einzahlung',
+      datum: new Date().toISOString()
+    });
+
+    speichern();
+    formSchliessen();
+    render();
+  }
+
+  function eintragLoeschen(index) {
+    eintraege.splice(index, 1);
+    speichern();
+    render();
+  }
+
+  function guthabenHinzufuegen() {
+    var input = document.getElementById('start-input');
+    var wert = parseFloat(input.value);
+    if (isNaN(wert) || wert <= 0) return;
+    startguthaben += wert;
+    input.value = '';
+    speichern();
+    render();
+  }
+
+  function sparklineZeichnen(verlauf) {
+    var svg = document.getElementById('sparkline');
+    var leerHinweis = document.getElementById('chart-leer');
+
+    if (verlauf.length === 0) {
+      svg.style.display = 'none';
+      leerHinweis.style.display = 'block';
+      return;
+    }
+    // Bei nur einem Punkt (nur Startguthaben, noch keine Bewegung) eine flache Linie zeigen
+    if (verlauf.length === 1) {
+      verlauf = [verlauf[0], verlauf[0]];
+    }
+    svg.style.display = 'block';
+    leerHinweis.style.display = 'none';
+
+    var min = Math.min.apply(null, verlauf);
+    var max = Math.max.apply(null, verlauf);
+    if (min === max) { min -= 1; max += 1; }
+
+    var breite = 300, hoehe = 90, padding = 6;
+    var punkte = verlauf.map(function(wert, i) {
+      var x = (i / (verlauf.length - 1)) * breite;
+      var y = hoehe - padding - ((wert - min) / (max - min)) * (hoehe - padding * 2);
+      return x.toFixed(1) + ',' + y.toFixed(1);
+    });
+
+    var farbe = verlauf[verlauf.length - 1] >= verlauf[0] ? '#3FE0A5' : '#FF5C6C';
+    var flaeche = 'M0,' + hoehe + ' L' + punkte.join(' L') + ' L' + breite + ',' + hoehe + ' Z';
+
+    svg.innerHTML =
+      '<path d="' + flaeche + '" fill="' + farbe + '" opacity="0.12"></path>' +
+      '<polyline points="' + punkte.join(' ') + '" fill="none" stroke="' + farbe + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></polyline>';
+  }
+
+  function render() {
+    var ausgabenSumme = 0;
+    var einzahlungSumme = 0;
+
+    eintraege.forEach(function(e) {
+      if (e.typ === 'einzahlung') {
+        einzahlungSumme += e.betrag;
+      } else {
+        ausgabenSumme += e.betrag;
+      }
+    });
+
+    var guthaben = startguthaben - ausgabenSumme + einzahlungSumme;
+    document.getElementById('balance-anzeige').textContent = euroText(guthaben);
+    aktuellesGuthaben = guthaben;
+    guthabenSynchronisieren();
+
+    var prozentBadge = document.getElementById('prozent-badge');
+    var prozent = prozentBerechnen(startguthaben, guthaben);
+    if (prozent === null) {
+      prozentBadge.style.display = 'none';
+    } else {
+      prozentBadge.style.display = 'inline-block';
+      prozentBadge.textContent = prozentText(prozent);
+      prozentBadge.className = 'prozent-badge ' + (prozent >= 0 ? 'positiv' : 'negativ');
+    }
+
+    var sub = document.getElementById('balance-sub');
+    if (eintraege.length === 0) {
+      sub.textContent = 'Noch keine Einträge erfasst';
+    } else {
+      sub.textContent = '− ' + ausgabenSumme.toFixed(2).replace('.', ',') + ' € ausgegeben · + ' +
+        einzahlungSumme.toFixed(2).replace('.', ',') + ' € eingezahlt';
+    }
+
+    var verlauf = [startguthaben];
+    var laufenderWert = startguthaben;
+    var chronologisch = eintraege.slice().reverse();
+    chronologisch.forEach(function(e) {
+      laufenderWert += (e.typ === 'einzahlung' ? e.betrag : -e.betrag);
+      verlauf.push(laufenderWert);
+    });
+    sparklineZeichnen(verlauf);
+
+    var liste = document.getElementById('tx-liste');
+    liste.innerHTML = '';
+
+    if (eintraege.length === 0) {
+      var leer = document.createElement('div');
+      leer.className = 'leer-hinweis';
+      leer.innerHTML = 'Noch keine Einträge vorhanden.<br>Tippe oben auf "Eintrag hinzufügen".';
+      liste.appendChild(leer);
+      return;
+    }
+
+    eintraege.forEach(function(e, index) {
+      var istEinzahlung = e.typ === 'einzahlung';
+      var row = document.createElement('div');
+      row.className = 'tx-row';
+
+      var iconDiv = document.createElement('div');
+      iconDiv.className = 'tx-icon';
+      iconDiv.textContent = kategorieIcon(e.kategorie);
+
+      var mitteDiv = document.createElement('div');
+      mitteDiv.className = 'tx-mitte';
+      var nameDiv = document.createElement('div');
+      nameDiv.className = 'tx-name';
+      nameDiv.textContent = e.name;
+      var datumDiv = document.createElement('div');
+      datumDiv.className = 'tx-datum';
+      datumDiv.textContent = datumText(e.datum);
+      mitteDiv.appendChild(nameDiv);
+      mitteDiv.appendChild(datumDiv);
+
+      var betragDiv = document.createElement('div');
+      betragDiv.className = 'tx-betrag' + (istEinzahlung ? ' einzahlung' : '');
+      betragDiv.textContent = (istEinzahlung ? '+ ' : '− ') + e.betrag.toFixed(2).replace('.', ',') + ' €';
+
+      var loeschenBtn = document.createElement('button');
+      loeschenBtn.className = 'tx-loeschen';
+      loeschenBtn.textContent = '✕';
+      loeschenBtn.addEventListener('click', function() {
+        eintragLoeschen(index);
+      });
+
+      row.appendChild(iconDiv);
+      row.appendChild(mitteDiv);
+      row.appendChild(betragDiv);
+      row.appendChild(loeschenBtn);
+      liste.appendChild(row);
+    });
+  }
+
+  // ==== Ghost-Avatar-Generator ====
+  var geisterFarben = [
+    { hintergrund: '#2A1B4D', geist: '#AB9FF2' },
+    { hintergrund: '#1B2E42', geist: '#5DCAA5' },
+    { hintergrund: '#4D1B2E', geist: '#F0997B' },
+    { hintergrund: '#1B4D3A', geist: '#7FD4E8' },
+    { hintergrund: '#4D3A1B', geist: '#F5C453' },
+    { hintergrund: '#3A1B4D', geist: '#E893C4' },
+    { hintergrund: '#1B354D', geist: '#93C5FD' },
+    { hintergrund: '#4D2A1B', geist: '#FF9A7A' }
+  ];
+
+  function textHash(text) {
+    var hash = 0;
+    for (var i = 0; i < text.length; i++) {
+      hash = text.charCodeAt(i) + ((hash << 5) - hash);
+      hash = hash & hash;
+    }
+    return Math.abs(hash);
+  }
+
+  function geistAvatarSvg(name) {
+    var hash = textHash(name || '?');
+    var farben = geisterFarben[hash % geisterFarben.length];
+    var augenStil = Math.floor(hash / geisterFarben.length) % 3;
+
+    var augen;
+    if (augenStil === 0) {
+      // Normale Augen: zwei Punkte
+      augen = '<circle cx="38" cy="46" r="5" fill="' + farben.hintergrund + '"/>' +
+              '<circle cx="62" cy="46" r="5" fill="' + farben.hintergrund + '"/>';
+    } else if (augenStil === 1) {
+      // Zwinkern: ein Punkt, ein Strich
+      augen = '<circle cx="38" cy="46" r="5" fill="' + farben.hintergrund + '"/>' +
+              '<path d="M56,46 Q62,42 68,46" stroke="' + farben.hintergrund + '" stroke-width="3" fill="none" stroke-linecap="round"/>';
+    } else {
+      // Freudig: zwei gebogene Striche
+      augen = '<path d="M32,48 Q38,40 44,48" stroke="' + farben.hintergrund + '" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+              '<path d="M56,48 Q62,40 68,48" stroke="' + farben.hintergrund + '" stroke-width="3" fill="none" stroke-linecap="round"/>';
+    }
+
+    return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<rect width="100" height="100" fill="' + farben.hintergrund + '"/>' +
+      '<path d="M22,52 A28,28 0 0 1 78,52 L78,82 L68,72 L58,82 L50,72 L42,82 L32,72 L22,82 Z" fill="' + farben.geist + '"/>' +
+      augen +
+      '</svg>';
+  }
+
+  function geistAvatarElement(name) {
+    var div = document.createElement('div');
+    div.className = 'avatar-ghost';
+    div.innerHTML = geistAvatarSvg(name);
+    return div;
+  }
+
+  // ==== Freunde-Rangliste ====
+  var meinName = localStorage.getItem('wallet_freunde_name') || '';
+  var meineGruppe = localStorage.getItem('wallet_freunde_gruppe') || '';
+  var aktuellesGuthaben = 0;
+  var ranglisteUnsubscribe = null;
+
+  function gruppeCodeSauber(text) {
+    return text.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+  }
+
+  function freundeUiAnzeigen() {
+    var beitrittCard = document.getElementById('freunde-beitreten-card');
+    var ranglisteCard = document.getElementById('freunde-rangliste-card');
+    if (meinName && meineGruppe) {
+      beitrittCard.style.display = 'none';
+      ranglisteCard.style.display = 'block';
+      document.getElementById('freunde-code-anzeige').textContent = meineGruppe;
+    } else {
+      beitrittCard.style.display = 'block';
+      ranglisteCard.style.display = 'none';
+    }
+  }
+
+  function gruppeBeitreten() {
+    var nameInput = document.getElementById('freunde-name-input');
+    var codeInput = document.getElementById('freunde-code-input');
+    var fehler = document.getElementById('freunde-fehler');
+
+    var name = nameInput.value.trim();
+    var code = gruppeCodeSauber(codeInput.value);
+
+    if (name === '' || code === '') {
+      fehler.classList.add('sichtbar');
+      return;
+    }
+    fehler.classList.remove('sichtbar');
+
+    meinName = name;
+    meineGruppe = code;
+    localStorage.setItem('wallet_freunde_name', meinName);
+    localStorage.setItem('wallet_freunde_gruppe', meineGruppe);
+
+    freundeUiAnzeigen();
+    ranglisteAbonnieren();
+    guthabenSynchronisieren();
+  }
+
+  function gruppeVerlassen() {
+    if (ranglisteUnsubscribe) {
+      ranglisteUnsubscribe();
+      ranglisteUnsubscribe = null;
+    }
+    meinName = '';
+    meineGruppe = '';
+    localStorage.removeItem('wallet_freunde_name');
+    localStorage.removeItem('wallet_freunde_gruppe');
+    document.getElementById('freunde-name-input').value = '';
+    document.getElementById('freunde-code-input').value = '';
+    freundeUiAnzeigen();
+  }
+
+  function guthabenSynchronisieren() {
+    if (!meinName || !meineGruppe) return;
+    db.collection('gruppen').doc(meineGruppe).collection('spieler').doc(meinName).set({
+      name: meinName,
+      guthaben: aktuellesGuthaben,
+      startguthaben: startguthaben,
+      aktualisiert: firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(function(fehler) {
+      console.error('Synchronisieren fehlgeschlagen:', fehler);
+    });
+  }
+
+  function ranglisteRendern(spielerListe) {
+    var liste = document.getElementById('rangliste-liste');
+    liste.innerHTML = '';
+
+    if (spielerListe.length === 0) {
+      var leer = document.createElement('div');
+      leer.className = 'leer-hinweis';
+      leer.textContent = 'Noch niemand in dieser Gruppe.';
+      liste.appendChild(leer);
+      return;
+    }
+
+    spielerListe.forEach(function(spieler, index) {
+      var row = document.createElement('div');
+      row.className = 'rang-row' + (spieler.name === meinName ? ' ich' : '');
+
+      var platz = document.createElement('div');
+      platz.className = 'rang-platz';
+      platz.textContent = (index + 1) + '.';
+
+      var avatar = geistAvatarElement(spieler.name);
+
+      var name = document.createElement('div');
+      name.className = 'rang-name';
+      name.textContent = spieler.name + (spieler.name === meinName ? ' (Du)' : '');
+
+      var betrag = document.createElement('div');
+      betrag.className = 'rang-betrag';
+      betrag.textContent = euroText(spieler.guthaben);
+
+      row.appendChild(platz);
+      row.appendChild(avatar);
+      row.appendChild(name);
+      row.appendChild(betrag);
+
+      var prozent = prozentBerechnen(spieler.startguthaben, spieler.guthaben);
+      if (prozent !== null) {
+        var prozentSpan = document.createElement('div');
+        prozentSpan.className = 'rang-prozent ' + (prozent >= 0 ? 'positiv' : 'negativ');
+        prozentSpan.textContent = prozentText(prozent);
+        row.appendChild(prozentSpan);
+      }
+      liste.appendChild(row);
+    });
+  }
+
+  function ranglisteAbonnieren() {
+    if (!meineGruppe) return;
+    if (ranglisteUnsubscribe) ranglisteUnsubscribe();
+
+    ranglisteUnsubscribe = db.collection('gruppen').doc(meineGruppe).collection('spieler')
+      .orderBy('guthaben', 'desc')
+      .onSnapshot(function(snapshot) {
+        var spielerListe = [];
+        snapshot.forEach(function(doc) {
+          spielerListe.push(doc.data());
+        });
+        ranglisteRendern(spielerListe);
+      }, function(fehler) {
+        console.error('Rangliste laden fehlgeschlagen:', fehler);
+      });
+  }
+
+  // ---- Event-Listener registrieren ----
+  document.getElementById('start-setzen-btn').addEventListener('click', guthabenHinzufuegen);
+  document.getElementById('add-btn').addEventListener('click', formOeffnen);
+  document.getElementById('abbrechen-btn').addEventListener('click', formSchliessen);
+  document.getElementById('speichern-btn').addEventListener('click', eintragSpeichern);
+  document.getElementById('typ-btn-ausgabe').addEventListener('click', function() { typWaehlen('ausgabe'); });
+  document.getElementById('typ-btn-einzahlung').addEventListener('click', function() { typWaehlen('einzahlung'); });
+  document.getElementById('freunde-beitreten-btn').addEventListener('click', gruppeBeitreten);
+  document.getElementById('freunde-verlassen-btn').addEventListener('click', gruppeVerlassen);
+
+  // ---- Start ----
+  kategorieGridBauen();
+  typWaehlen('ausgabe');
+  freundeUiAnzeigen();
+  if (meinName && meineGruppe) ranglisteAbonnieren();
+  render();
+
+})();
+</script>
+</body>
+</html>
